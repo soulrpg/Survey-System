@@ -8,3 +8,41 @@ api_login_check:
 register:
   path: /api/register
   controller: App\Controller\RegistrationController::index
+
+survey_list:
+  path: /api/survey
+  methods: [GET]
+  controller: App\Controller\SurveyController::list
+
+survey_show:
+  path: /api/survey/{id}
+  methods: [GET]
+  controller: App\Controller\SurveyController::show
+  requirements:
+      id: '\d+'
+
+survey_create:
+  path: /api/survey/create
+  methods: [POST]
+  controller: App\Controller\SurveyController::create
+
+survey_update:
+  path: /api/survey/update/{id}
+  methods: [PUT]
+  controller: App\Controller\SurveyController::edit
+  requirements:
+    id: '\d+'
+
+survey_delete:
+  path: /api/survey/delete/{id}
+  methods: [DELETE]
+  controller: App\Controller\SurveyController::delete
+  requirements:
+    id: '\d+'
+
+survey_send:
+  path: /api/survey/send/{id}
+  methods: [POST]
+  controller: App\Controller\SurveyController::send
+  requirements:
+    id: '\d+'

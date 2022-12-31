@@ -43,7 +43,7 @@ class RegistrationController extends AbstractController
         $errors = $validator->validate($user);
 
         if (count($errors) > 0) {
-            return new JsonResponse(['errors' => (string) $errors], 400);
+            return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
         } else {
             $hashedPassword = $passwordHasher->hashPassword(
                 $user,
@@ -57,7 +57,7 @@ class RegistrationController extends AbstractController
 
             $entityManager->persist($user);
             $entityManager->flush();
-            return new JsonResponse(['msg' => 'Success'], 201);
+            return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
         }
     }
 }
