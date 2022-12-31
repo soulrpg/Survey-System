@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -47,6 +49,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * )
      */
     private $password;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Survey::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $surveys;
+
+    public function __construct()
+    {
+        $this->surveys = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -136,5 +148,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, Survey>
+     */
+    public function getSurveys(): Collection
+    {
+        return $this->surveys;
+    }
+
+    public function addSurvey(Survey $survey): self
+    {
+        if (!$this->surveys->contains($survey)) {
+            $this->surveys[] = $survey;
+            $survey->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSurvey(Survey $survey): self
+    {
+        if ($this->surveys->removeElement($survey)) {
+            // set the owning side to null (unless already changed)
+            if ($survey->getUser() === $this) {
+                $survey->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
