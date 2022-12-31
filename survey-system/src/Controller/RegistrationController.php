@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Controller;
-
 
 use App\Entity\User;
 use App\Form\Type\UserType;
@@ -13,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -23,33 +22,42 @@ class RegistrationController extends AbstractController
      * @param UserRepository $userRepository
      * @return \InvalidArgumentException
      */
-    public function index(Request $request, UserPasswordHasherInterface $passwordHasher, ManagerRegistry $doctrine, UserRepository $userRepository): Response
+    public function index
+    (
+        Request $request, 
+        UserPasswordHasherInterface $passwordHasher, 
+        ManagerRegistry $doctrine,
+        UserRepository $userRepository,
+        ValidatorInterface $validator
+    ): Response
     {
         $entityManager = $doctrine->getManager();
-        $email = null;
-
-        if ($userRepository->findOneByEmail($email)) {
-            throw new \InvalidArgumentException("User with given email already exists!");
-        }
 
         $user = new User();
 
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+        $formData = $request->getContent();
+        $body = json_decode($formData, true);
+        $form = $this->createForm(UserType::class, $user, ['csrf_protection' => false]);
+        $form->submit($body);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
+        $errors = $validator->validate($user);
 
+        if (count($errors) > 0) {
+            return new JsonResponse(['errors' => (string) $errors], 400);
+        } else {
             $hashedPassword = $passwordHasher->hashPassword(
                 $user,
                 $user->getPassword()
             );
             $user->setPassword($hashedPassword);
+
+            if ($userRepository->findOneByEmail($user->getEmail())) {
+                throw new \InvalidArgumentException("User with given email already exists!");
+            }
+
             $entityManager->persist($user);
             $entityManager->flush();
-
-            return new JsonResponse([], 200);
+            return new JsonResponse(['msg' => 'Success'], 201);
         }
-        return new JsonResponse(['errors' => $form->getErrors()], 400);
     }
 }
