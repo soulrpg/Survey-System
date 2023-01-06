@@ -79,3 +79,29 @@ question_list_options:
   controller: App\Controller\QuestionController::listOptions
   requirements:
     id: '\d+'
+
+option_show:
+  path: /api/option/{id}
+  methods: [GET]
+  controller: App\Controller\OptionController::show
+  requirements:
+      id: '\d+'
+
+option_create:
+  path: /api/option/create
+  methods: [POST]
+  controller: App\Controller\OptionController::create
+
+option_update:
+  path: /api/option/update/{id}
+  methods: [PUT]
+  controller: App\Controller\OptionController::update
+  requirements:
+    id: '\d+'
+
+option_delete:
+  path: /api/option/delete/{id}
+  methods: [DELETE]
+  controller: App\Controller\OptionController::delete
+  requirements:
+    id: '\d+'
