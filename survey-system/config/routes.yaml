@@ -29,7 +29,7 @@ survey_create:
 survey_update:
   path: /api/survey/update/{id}
   methods: [PUT]
-  controller: App\Controller\SurveyController::edit
+  controller: App\Controller\SurveyController::update
   requirements:
     id: '\d+'
 
@@ -37,12 +37,5 @@ survey_delete:
   path: /api/survey/delete/{id}
   methods: [DELETE]
   controller: App\Controller\SurveyController::delete
-  requirements:
-    id: '\d+'
-
-survey_send:
-  path: /api/survey/send/{id}
-  methods: [POST]
-  controller: App\Controller\SurveyController::send
   requirements:
     id: '\d+'

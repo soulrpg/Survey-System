@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Survey;
 use App\Repository\SurveyRepository;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
+use App\Service\FormProcessingService;
+use App\Service\SerializerService;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 /**
  * Gives access to all CRUD operations on survey for user that is an owner of a given survey.
@@ -18,37 +20,78 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class SurveyController extends AbstractController
 {
-    public function list(SurveyRepository $surveyRepository): JsonResponse
+    /**
+     * @param SurveyRepository $surveyRepository
+     * @param SerializerService $serializerService
+     * @return JsonResponse
+     */
+    public function list(SurveyRepository $surveyRepository, SerializerService $serializerService): JsonResponse
     {
         return new JsonResponse(
-            json_encode($surveyRepository->findBy(['user' => $this->getUser()->getId()])), 
+            $serializerService->getSerializer()->normalize(
+                $surveyRepository->findBy(['user' => $this->getUser()]),
+                'json',
+                [AbstractNormalizer::ATTRIBUTES => ['id', 'title', 'description', 'public']]
+            ), 
             Response::HTTP_OK
         );
     }
 
-    public function show(Survey $survey): JsonResponse
+    public function show(Survey $survey, SerializerService $serializerService): JsonResponse
     {
-        return new JsonResponse(json_encode($survey), Response::HTTP_OK);
+        return new JsonResponse(
+            $serializerService->getSerializer()->normalize(
+                $survey,
+                'json',
+                [AbstractNormalizer::ATTRIBUTES => ['id', 'title', 'description', 'public']]
+            ), 
+            Response::HTTP_OK
+        );
     }
 
-    public function send(Survey $survey, Request $request): JsonResponse
+    public function update(
+        Survey $survey,
+        Request $request,
+        ManagerRegistry $doctrine, 
+        FormProcessingService $formProcessingService
+    ): JsonResponse
     {
-        $formData = $request->getContent();
-        $body = json_decode($formData, true);
-        //TODO implement form data processing
-        return new JsonResponse(null, Response::HTTP_CREATED);
+        $entityManager = $doctrine->getManager();
+        $survey->setUser($this->getUser());
+
+        $form = $this->createForm(\App\Form\Type\SurveyType::class , $survey, ['csrf_protection' => false]);
+        $errors = $formProcessingService->processForm($form, $request, $survey);
+
+        if (count($errors) > 0) {
+            return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
+        } else {
+            $entityManager->persist($survey);
+            $entityManager->flush();
+            return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
+        }
     }
 
-    public function update(Survey $survey): JsonResponse
+    public function create(
+        Request $request,
+        ManagerRegistry $doctrine, 
+        FormProcessingService $formProcessingService
+    ): JsonResponse
     {
-        //TODO implement form data processing
-        return new JsonResponse(null, Response::HTTP_OK);
-    }
+        $survey = new Survey();
+        
+        $entityManager = $doctrine->getManager();
+        $survey->setUser($this->getUser());
+        
+        $form = $this->createForm(\App\Form\Type\SurveyType::class , $survey, ['csrf_protection' => false]);
+        $errors = $formProcessingService->processForm($form, $request, $survey);
 
-    public function create(Survey $survey): JsonResponse
-    {
-        //TODO implement form data processing
-        return new JsonResponse(null, Response::HTTP_CREATED);
+        if (count($errors) > 0) {
+            return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
+        } else {
+            $entityManager->persist($survey);
+            $entityManager->flush();
+            return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
+        }
     }
 
     public function delete(Survey $survey, ManagerRegistry $doctrine): JsonResponse
@@ -59,7 +102,7 @@ class SurveyController extends AbstractController
             $entityManager->remove($survey);
             $entityManager->flush();
         } else {
-            throw new NotFoundHttpException('Survey ID does not belong to correct owner.');
+            $this->createNotFoundException('Survey ID does not belong to correct owner.');
         }
         return new JsonResponse(null, Response::HTTP_OK);
     }
