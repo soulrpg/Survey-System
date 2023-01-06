@@ -7,6 +7,7 @@ use App\Entity\Survey;
 use App\Repository\SurveyRepository;
 use App\Service\FormProcessingService;
 use App\Service\SerializerService;
+use App\Service\ValidateAnswersService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -163,7 +164,8 @@ class SurveyController extends AbstractController
         Survey $survey, 
         Request $request,
         ManagerRegistry $doctrine, 
-        FormProcessingService $formProcessingService
+        FormProcessingService $formProcessingService,
+        ValidateAnswersService $validateAnswersService
     ): JsonResponse 
     {
         $answerGroup = new AnswerGroup();
@@ -177,20 +179,12 @@ class SurveyController extends AbstractController
             return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
         } else {
             // Check if all answers correspond to proper survey and question
-            $questionsAnswered = array_fill_Keys($survey->getQuestions()->getKeys(), false);
-            foreach ($answerGroup->getAnswers() as $answer)
-            {
-                $questionId = $answer->getPickedOption()->getQuestion()->getId();
-                // If array key doesn't exist it means there is answer submitted to a question not belonging
-                // to current survey
-                if (!array_key_exists($questionId, $questionsAnswered)) {
-                    return new JsonResponse(['msg' => 'Wrong answer group submitted!'], Response::HTTP_BAD_REQUEST);
-                }
-                $questionsAnswered[$questionId] = true;
+            try {
+                $validateAnswersService->validate($survey, $answerGroup);
+            } catch (\UnexpectedValueException $exception) {
+                return new JsonResponse(['msg' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
             }
-            if (in_array(false, $questionsAnswered)) {
-                return new JsonResponse(['msg' => 'Not all answers submitted!'], Response::HTTP_BAD_REQUEST);
-            }
+            
             $entityManager->persist($answerGroup);
             $entityManager->flush();
             return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
