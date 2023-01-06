@@ -19,25 +19,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 class QuestionController extends AbstractController
 {
     /**
-     * List questions belonging to a specific survey
-     * 
-     * @param Survey $survey
-     * @param SerializerService $serializerService
-     * @return JsonResponse
-     */
-    public function list(Survey $survey, SerializerService $serializerService): JsonResponse
-    {
-        return new JsonResponse(
-            $serializerService->getSerializer()->normalize(
-                $survey->getQuestions(),
-                'json',
-                [AbstractNormalizer::ATTRIBUTES => ['id', 'title', 'description']]
-            ), 
-            Response::HTTP_OK
-        );
-    }
-
-    /**
      * Shows specific question
      * 
      * @param Question $question
@@ -113,5 +94,24 @@ class QuestionController extends AbstractController
             return new JsonResponse(['msg' => 'Question does not belong to current user'], Response::HTTP_FORBIDDEN);
         }
         return new JsonResponse(null, Response::HTTP_OK);
+    }
+
+    /**
+     * List options belonging to a specific question
+     * 
+     * @param Question $question
+     * @param SerializerService $serializerService
+     * @return JsonResponse
+     */
+    public function listQuestions(Question $question, SerializerService $serializerService): JsonResponse
+    {
+        return new JsonResponse(
+            $serializerService->getSerializer()->normalize(
+                $question->getOptions(),
+                'json',
+                [AbstractNormalizer::ATTRIBUTES => ['id', 'name']]
+            ), 
+            Response::HTTP_OK
+        );
     }
 }

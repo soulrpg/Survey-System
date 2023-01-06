@@ -110,4 +110,23 @@ class SurveyController extends AbstractController
         }
         return new JsonResponse(null, Response::HTTP_OK);
     }
+
+    /**
+     * List questions belonging to a specific survey
+     * 
+     * @param Survey $survey
+     * @param SerializerService $serializerService
+     * @return JsonResponse
+     */
+    public function listQuestions(Survey $survey, SerializerService $serializerService): JsonResponse
+    {
+        return new JsonResponse(
+            $serializerService->getSerializer()->normalize(
+                $survey->getQuestions(),
+                'json',
+                [AbstractNormalizer::ATTRIBUTES => ['id', 'title', 'description']]
+            ), 
+            Response::HTTP_OK
+        );
+    }
 }
