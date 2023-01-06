@@ -11,7 +11,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 
-class AnswerType extends AbstractType
+class AnswerGroupType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -24,9 +24,10 @@ class AnswerType extends AbstractType
                 'class' => Option::class,
                 'required' => true,
             ])
-            ->add('question', EntityType::class, [
+            ->add('answers', EntityType::class, [
                 'class' => Question::class,
                 'required' => true,
+                'multiple' => true,
             ]);
     }
 }
