@@ -5,13 +5,13 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\Type\UserType;
 use App\Repository\UserRepository;
+use App\Service\FormProcessingService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -28,19 +28,15 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $passwordHasher, 
         ManagerRegistry $doctrine,
         UserRepository $userRepository,
-        ValidatorInterface $validator
+        FormProcessingService $formProcessingService
     ): Response
     {
         $entityManager = $doctrine->getManager();
 
         $user = new User();
 
-        $formData = $request->getContent();
-        $body = json_decode($formData, true);
-        $form = $this->createForm(UserType::class, $user, ['csrf_protection' => false]);
-        $form->submit($body);
-
-        $errors = $validator->validate($user);
+        $form = $this->createForm(UserType::class , $user, ['csrf_protection' => false]);
+        $errors = $formProcessingService->processForm($form, $request, $user);
 
         if (count($errors) > 0) {
             return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
