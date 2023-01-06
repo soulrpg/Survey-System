@@ -50,10 +50,16 @@ class Survey
      */
     private $answers;
 
+    /**
+     * @ORM\OneToMany(targetEntity=AnswerGroup::class, mappedBy="survey", orphanRemoval=true)
+     */
+    private $answerGroups;
+
     public function __construct()
     {
         $this->questions = new ArrayCollection();
         $this->answers = new ArrayCollection();
+        $this->answerGroups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,6 +169,36 @@ class Survey
             // set the owning side to null (unless already changed)
             if ($answer->getSurvey() === $this) {
                 $answer->setSurvey(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AnswerGroup>
+     */
+    public function getAnswerGroups(): Collection
+    {
+        return $this->answerGroups;
+    }
+
+    public function addAnswerGroup(AnswerGroup $answerGroup): self
+    {
+        if (!$this->answerGroups->contains($answerGroup)) {
+            $this->answerGroups[] = $answerGroup;
+            $answerGroup->setSurvey($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnswerGroup(AnswerGroup $answerGroup): self
+    {
+        if ($this->answerGroups->removeElement($answerGroup)) {
+            // set the owning side to null (unless already changed)
+            if ($answerGroup->getSurvey() === $this) {
+                $answerGroup->setSurvey(null);
             }
         }
 

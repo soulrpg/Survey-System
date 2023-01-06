@@ -18,50 +18,20 @@ class Answer
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=survey::class, inversedBy="answers")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $survey;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Question::class, inversedBy="answers")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $question;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Option::class, inversedBy="answers")
      * @ORM\JoinColumn(nullable=false)
      */
     private $pickedOption;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=AnswerGroup::class, inversedBy="answers")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $answerGroup;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getSurvey(): ?survey
-    {
-        return $this->survey;
-    }
-
-    public function setSurvey(?survey $survey): self
-    {
-        $this->survey = $survey;
-
-        return $this;
-    }
-
-    public function getQuestion(): ?Question
-    {
-        return $this->question;
-    }
-
-    public function setQuestion(?Question $question): self
-    {
-        $this->question = $question;
-
-        return $this;
     }
 
     public function getPickedOption(): ?Option
@@ -72,6 +42,18 @@ class Answer
     public function setPickedOption(?Option $pickedOption): self
     {
         $this->pickedOption = $pickedOption;
+
+        return $this;
+    }
+
+    public function getAnswerGroup(): ?AnswerGroup
+    {
+        return $this->answerGroup;
+    }
+
+    public function setAnswerGroup(?AnswerGroup $answerGroup): self
+    {
+        $this->answerGroup = $answerGroup;
 
         return $this;
     }
