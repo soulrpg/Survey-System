@@ -40,10 +40,10 @@ survey_delete:
   requirements:
     id: '\d+'
 
-question_list:
-  path: /api/question/list/{id}
+survey_list_questions:
+  path: /api/survey/list-questions/{id}
   methods: [GET]
-  controller: App\Controller\QuestionController::list
+  controller: App\Controller\SurveyController::listQuestions
   requirements:
     id: '\d+'
 
@@ -70,5 +70,12 @@ question_delete:
   path: /api/question/delete/{id}
   methods: [DELETE]
   controller: App\Controller\QuestionController::delete
+  requirements:
+    id: '\d+'
+
+question_list_options:
+  path: /api/question/list-options/{id}
+  methods: [DELETE]
+  controller: App\Controller\QuestionController::listOptions
   requirements:
     id: '\d+'
