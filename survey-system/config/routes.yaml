@@ -39,3 +39,36 @@ survey_delete:
   controller: App\Controller\SurveyController::delete
   requirements:
     id: '\d+'
+
+question_list:
+  path: /api/question/list/{id}
+  methods: [GET]
+  controller: App\Controller\QuestionController::list
+  requirements:
+    id: '\d+'
+
+question_show:
+  path: /api/question/{id}
+  methods: [GET]
+  controller: App\Controller\QuestionController::show
+  requirements:
+      id: '\d+'
+
+question_create:
+  path: /api/question/create
+  methods: [POST]
+  controller: App\Controller\QuestionController::create
+
+question_update:
+  path: /api/question/update/{id}
+  methods: [PUT]
+  controller: App\Controller\QuestionController::update
+  requirements:
+    id: '\d+'
+
+question_delete:
+  path: /api/question/delete/{id}
+  methods: [DELETE]
+  controller: App\Controller\QuestionController::delete
+  requirements:
+    id: '\d+'
