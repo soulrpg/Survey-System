@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SurveyRepository;
+use App\Entity\AnswerGroup;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -46,19 +47,13 @@ class Survey
     private $questions;
 
     /**
-     * @ORM\OneToMany(targetEntity=Answer::class, mappedBy="survey", orphanRemoval=true)
-     */
-    private $answers;
-
-    /**
-     * @ORM\OneToMany(targetEntity=AnswerGroup::class, mappedBy="survey", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Question::class, mappedBy="survey")
      */
     private $answerGroups;
 
     public function __construct()
     {
         $this->questions = new ArrayCollection();
-        $this->answers = new ArrayCollection();
         $this->answerGroups = new ArrayCollection();
     }
 
@@ -139,36 +134,6 @@ class Survey
             // set the owning side to null (unless already changed)
             if ($question->getSurvey() === $this) {
                 $question->setSurvey(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Answer>
-     */
-    public function getAnswers(): Collection
-    {
-        return $this->answers;
-    }
-
-    public function addAnswer(Answer $answer): self
-    {
-        if (!$this->answers->contains($answer)) {
-            $this->answers[] = $answer;
-            $answer->setSurvey($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAnswer(Answer $answer): self
-    {
-        if ($this->answers->removeElement($answer)) {
-            // set the owning side to null (unless already changed)
-            if ($answer->getSurvey() === $this) {
-                $answer->setSurvey(null);
             }
         }
 

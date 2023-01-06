@@ -132,6 +132,25 @@ class SurveyController extends AbstractController
     }
 
     /**
+     * List answerGroups belonging to a specific survey
+     * 
+     * @param Survey $survey
+     * @param SerializerService $serializerService
+     * @return JsonResponse
+     */
+    public function listAnswerGroups(Survey $survey, SerializerService $serializerService): JsonResponse
+    {
+        return new JsonResponse(
+            $serializerService->getSerializer()->normalize(
+                $survey->getAnswerGroups(),
+                'json',
+                [AbstractNormalizer::ATTRIBUTES => ['id', ['pickedOption' => 'id']]]
+            ), 
+            Response::HTTP_OK
+        );
+    }
+
+    /**
      * Submit answers (AnswerGroup) to given survey
      *
      * @param Survey $survey

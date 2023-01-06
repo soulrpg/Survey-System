@@ -39,15 +39,9 @@ class Question
      */
     private $survey;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Answer::class, mappedBy="question", orphanRemoval=true)
-     */
-    private $answers;
-
     public function __construct()
     {
         $this->options = new ArrayCollection();
-        $this->answers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -117,36 +111,6 @@ class Question
     public function setSurvey(?Survey $survey): self
     {
         $this->survey = $survey;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Answer>
-     */
-    public function getAnswers(): Collection
-    {
-        return $this->answers;
-    }
-
-    public function addAnswer(Answer $answer): self
-    {
-        if (!$this->answers->contains($answer)) {
-            $this->answers[] = $answer;
-            $answer->setQuestion($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAnswer(Answer $answer): self
-    {
-        if ($this->answers->removeElement($answer)) {
-            // set the owning side to null (unless already changed)
-            if ($answer->getQuestion() === $this) {
-                $answer->setQuestion(null);
-            }
-        }
 
         return $this;
     }

@@ -54,6 +54,13 @@ survey_send_answers:
   requirements:
     id: '\d+'
 
+survey_list_answer_groups:
+  path: /api/survey/list-answers/{id}
+  methods: [GET]
+  controller: App\Controller\SurveyController::listAnswerGroups
+  requirements:
+    id: '\d+'
+
 question_show:
   path: /api/question/{id}
   methods: [GET]

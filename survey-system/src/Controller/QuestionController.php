@@ -103,7 +103,7 @@ class QuestionController extends AbstractController
      * @param SerializerService $serializerService
      * @return JsonResponse
      */
-    public function listQuestions(Question $question, SerializerService $serializerService): JsonResponse
+    public function listOptions(Question $question, SerializerService $serializerService): JsonResponse
     {
         return new JsonResponse(
             $serializerService->getSerializer()->normalize(
