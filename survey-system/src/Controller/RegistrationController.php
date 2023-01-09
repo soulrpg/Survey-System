@@ -48,7 +48,7 @@ class RegistrationController extends AbstractController
             $user->setPassword($hashedPassword);
 
             if ($userRepository->findOneByEmail($user->getEmail())) {
-                throw new \InvalidArgumentException("User with given email already exists!");
+                return new JsonResponse(['errors' => 'User with given email already exists!'], 404);
             }
 
             $entityManager->persist($user);
