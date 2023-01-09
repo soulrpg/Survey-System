@@ -4,7 +4,6 @@ import RegistrationFrom from "../components/RegistrationForm.vue"
 
 <template>
   <main>
-    Home view!
     <RegistrationFrom/>
   </main>
 </template>
