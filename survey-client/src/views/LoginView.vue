@@ -3,6 +3,6 @@
 
 <template>
   <main>
-    Home view!
+    Login view!
   </main>
 </template>

@@ -3,6 +3,6 @@
 
 <template>
   <main>
-    Home view!
+    Survey view!
   </main>
 </template>
