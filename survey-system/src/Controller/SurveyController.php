@@ -185,6 +185,9 @@ class SurveyController extends AbstractController
                 return new JsonResponse(['msg' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
             }
             
+            foreach ($answerGroup->getAnswers() as $answer) {
+                $entityManager->persist($answer);
+            }
             $entityManager->persist($answerGroup);
             $entityManager->flush();
             return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
