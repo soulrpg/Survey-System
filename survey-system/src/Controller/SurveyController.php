@@ -110,7 +110,7 @@ class SurveyController extends AbstractController
         } else {
             return new JsonResponse(['msg' => 'Survey does not belong to current user'], Response::HTTP_FORBIDDEN);
         }
-        return new JsonResponse(null, Response::HTTP_OK);
+        return new JsonResponse(['msg' => 'Success'], Response::HTTP_OK);
     }
 
     /**
@@ -153,6 +153,8 @@ class SurveyController extends AbstractController
 
     /**
      * Submit answers (AnswerGroup) to given survey
+     * TODO: Check if that works, if not create answer group & answers manually without
+     * processing the form
      *
      * @param Survey $survey
      * @param Request $request
@@ -186,6 +188,7 @@ class SurveyController extends AbstractController
             }
             
             foreach ($answerGroup->getAnswers() as $answer) {
+                $answer->setAnswerGroup($answerGroup->getId());
                 $entityManager->persist($answer);
             }
             $entityManager->persist($answerGroup);

@@ -1,8 +1,9 @@
 <script setup>
+import TakeSurvey from "../components/TakeSurvey.vue"
 </script>
 
 <template>
   <main>
-    Survey view!
+    <TakeSurvey/>
   </main>
 </template>

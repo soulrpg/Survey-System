@@ -1,8 +1,9 @@
 <script setup>
+import EditForm from "../components/EditForm.vue"
 </script>
 
 <template>
   <main>
-    Edit view!
+    <EditForm/>
   </main>
 </template>

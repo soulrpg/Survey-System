@@ -26,7 +26,7 @@ final class ValidateAnswersService
             // to current survey
             if (!array_key_exists($questionId, $questionsAnswered)) {
                 throw new \UnexpectedValueException('Wrong answer group submitted!');
-            }
+            } 
             $questionsAnswered[$questionId] = true;
         }
         if (in_array(false, $questionsAnswered)) {
