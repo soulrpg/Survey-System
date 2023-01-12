@@ -93,7 +93,7 @@ class QuestionController extends AbstractController
         } else {
             return new JsonResponse(['msg' => 'Question does not belong to current user'], Response::HTTP_FORBIDDEN);
         }
-        return new JsonResponse(null, Response::HTTP_OK);
+        return new JsonResponse(['msg' => 'Success'], Response::HTTP_OK);
     }
 
     /**

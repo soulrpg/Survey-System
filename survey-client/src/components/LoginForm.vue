@@ -35,7 +35,7 @@ export default {
                 if (data.token !== undefined && data.token.length > 0) {
                     this.userData.email = '';
                     this.password = '';
-                    setCookie('surveyUserToken', data.token, 1)
+                    setCookie('surveyUserToken', data.token, 1 / 48)
                     this.showLogin = false;
                     this.msg = 'Login successfull.';
                 } else {

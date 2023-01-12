@@ -2,12 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Answer;
 use App\Entity\AnswerGroup;
 use App\Entity\Survey;
+use App\Repository\OptionRepository;
 use App\Repository\SurveyRepository;
 use App\Service\FormProcessingService;
 use App\Service\SerializerService;
 use App\Service\ValidateAnswersService;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,14 +44,18 @@ class SurveyController extends AbstractController
 
     public function show(Survey $survey, SerializerService $serializerService): JsonResponse
     {
-        return new JsonResponse(
-            $serializerService->getSerializer()->normalize(
-                $survey,
-                'json',
-                [AbstractNormalizer::ATTRIBUTES => ['id', 'title', 'description', 'public']]
-            ), 
-            Response::HTTP_OK
-        );
+        if ($survey->isPublic()) {
+            return new JsonResponse(
+                $serializerService->getSerializer()->normalize(
+                    $survey,
+                    'json',
+                    [AbstractNormalizer::ATTRIBUTES => ['id', 'title', 'description', 'public']]
+                ), 
+                Response::HTTP_OK
+            );
+        } else {
+            return new JsonResponse(['error' => 'Survey not found'], Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function update(
@@ -105,10 +112,15 @@ class SurveyController extends AbstractController
         $entityManager = $doctrine->getManager();
 
         if ($this->getUser()->getId() === $survey->getUser()->getId()) {
-            $entityManager->remove($survey);
-            $entityManager->flush();
+            try {
+                $entityManager->remove($survey);
+                $entityManager->flush();
+            } catch (ForeignKeyConstraintViolationException $exception) {
+                return new JsonResponse(['error' => 'You cannot remove survey with existing children.'], Response::HTTP_FORBIDDEN);
+            }
+
         } else {
-            return new JsonResponse(['msg' => 'Survey does not belong to current user'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['error' => 'Survey does not belong to current user'], Response::HTTP_FORBIDDEN);
         }
         return new JsonResponse(['msg' => 'Success'], Response::HTTP_OK);
     }
@@ -171,29 +183,36 @@ class SurveyController extends AbstractController
     ): JsonResponse 
     {
         $answerGroup = new AnswerGroup();
+        $answerGroup->setSurvey($survey);
         
         $entityManager = $doctrine->getManager();
-        
-        $form = $this->createForm(\App\Form\Type\AnswerGroup::class , $answerGroup, ['csrf_protection' => false]);
-        $errors = $formProcessingService->processForm($form, $request, $answerGroup);
 
-        if (count($errors) > 0) {
-            return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
-        } else {
-            // Check if all answers correspond to proper survey and question
-            try {
-                $validateAnswersService->validate($survey, $answerGroup);
-            } catch (\UnexpectedValueException $exception) {
-                return new JsonResponse(['msg' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
-            }
-            
-            foreach ($answerGroup->getAnswers() as $answer) {
-                $answer->setAnswerGroup($answerGroup->getId());
-                $entityManager->persist($answer);
-            }
-            $entityManager->persist($answerGroup);
-            $entityManager->flush();
-            return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
+        $entityManager->persist($answerGroup);
+        $entityManager->flush();
+
+        $formData = $request->getContent();
+        $body = json_decode($formData, true);
+
+        $optionRepository = new OptionRepository($doctrine);
+
+        foreach ($body as $answerId => $optionPicked) {
+            $newAnswer = new Answer();
+            $newAnswer->setPickedOption($optionRepository->find($optionPicked));
+            $answerGroup->addAnswer($newAnswer);
         }
+
+        try {
+            $validateAnswersService->validate($survey, $answerGroup);
+        } catch (\UnexpectedValueException $exception) {
+            return new JsonResponse(['msg' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        foreach ($answerGroup->getAnswers() as $answer) {
+            $answer->setAnswerGroup($answerGroup);
+            $entityManager->persist($answer);
+        }
+        $entityManager->flush();
+        
+        return new JsonResponse(['msg' => 'Success'], Response::HTTP_CREATED);
     }
 }

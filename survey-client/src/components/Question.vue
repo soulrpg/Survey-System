@@ -28,24 +28,24 @@ async function postData(url, data = {}, method = 'POST') {
 }
 
 export default {
-    props: ['questionData'],
+    props: ['questionData', 'index'],
     components: {
         Option,
     },
     data() {
         return {
             optionsVisible: false,
-            option: [],
+            options: [],
             newOption: {
                 name: '',
-                question: this.questionData.id,
+                question: this.index,
             },
             error: '',
         }
     },
     methods: {
         updateQuestion() {
-            postData(`http://localhost:8000/api/question/update/${this.questionData.id}`, this.questionData, 'PUT')
+            postData(`http://localhost:8000/api/question/update/${this.index}`, this.questionData, 'PUT')
             .then((data) => {
                 if (data.msg !== undefined && data.msg === 'Success') {
                     this.$parent.updateQuestionList();
@@ -55,7 +55,7 @@ export default {
             });
         },
         deleteQuestion() {
-            postData(`http://localhost:8000/api/question/delete/${this.questionData.id}`, {}, 'DELETE')
+            postData(`http://localhost:8000/api/question/delete/${this.index}`, {}, 'DELETE')
             .then((data) => {
                 if (data.msg !== undefined && data.msg === 'Success') {
                     this.$parent.updateQuestionList()
@@ -68,22 +68,22 @@ export default {
             postData('http://localhost:8000/api/option/create', this.newOption)
             .then((data) => {
                 if (data.msg !== undefined && data.msg === 'Success') {
-                    updateOptionList()
+                    this.updateOptionList()
                 } else {
                     this.error = data.message ?? '';
                 }
             });
         },
         changeOptionsVisibility() {
-            this.optionsVisible = !this.questionVisible;
-            if (this.optionssVisible) {
-                upadateOptionList()
+            this.optionsVisible = !this.optionsVisible;
+            if (this.optionsVisible) {
+                this.updateOptionList()
             }
         },
         updateOptionList() {
-            getData(`http://localhost:8000/api/question/list-options/${this.questionData.id}`)
+            getData(`http://localhost:8000/api/question/list-options/${this.index}`)
             .then((data) => {
-                this.$options = data
+                this.options = data
                 console.log(this.options)
             });
         }
@@ -99,11 +99,11 @@ export default {
         <input type="text" id="title" v-model="questionData.title"><br/>
         <label for="description">Description:</label><br/>
         <textarea rows="3" cols="50" id="description" v-model="questionData.description"/><br/>
-        <input type="hidden" id="identifier" v-model="questionData.id"/>
+        <input type="hidden" id="identifier" v-model="questionData.survey"/>
         <input type="submit" value="Update Question"/>
     </form>
     <form @submit.prevent="deleteQuestion" action="/" method="post">
-        <input type="hidden" id="identifier" v-model="questionData.id"/>
+        <input type="hidden" id="identifier" v-model="questionData.survey"/>
         <input type="submit" value="Delete Question"/>
     </form>
     <button @click="changeOptionsVisibility">Show options</button>
@@ -111,10 +111,10 @@ export default {
         <Option
             v-for="option in options"
             :key="option.id"
-            :optionData="{id: option.id, name: option.name}"
+            :index="option.id"
+            :optionData="{question: index, name: option.name}"
         />
         <h3>Add new option</h3>
-        <p v-if="error">{{error}}</p>
         <form @submit.prevent="addNewOption" action="/" method="post">
             <label for="name">Name:</label><br/>
             <input type="text" id="name" v-model="newOption.name"><br/>

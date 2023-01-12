@@ -27,7 +27,7 @@ async function postData(url, data = {}, method = 'POST') {
 }
 
 export default {
-    props: ['optionData'],
+    props: ['optionData', 'index'],
     data() {
         return {
             option: [],
@@ -36,7 +36,7 @@ export default {
     },
     methods: {
         updateOption() {
-            postData(`http://localhost:8000/api/option/update/${this.optionData.id}`, this.optionData, 'PUT')
+            postData(`http://localhost:8000/api/option/update/${this.index}`, this.optionData, 'PUT')
             .then((data) => {
                 if (data.msg !== undefined && data.msg === 'Success') {
                     this.$parent.updateOptionList();
@@ -46,7 +46,7 @@ export default {
             });
         },
         deleteOption() {
-            postData(`http://localhost:8000/api/option/delete/${this.optionData.id}`, {}, 'DELETE')
+            postData(`http://localhost:8000/api/option/delete/${this.index}`, {}, 'DELETE')
             .then((data) => {
                 if (data.msg !== undefined && data.msg === 'Success') {
                     this.$parent.updateOptionList()
@@ -65,11 +65,11 @@ export default {
     <form @submit.prevent="updateOption" action="/" method="post">
         <label for="name">Name:</label><br/>
         <input type="text" id="Name" v-model="optionData.name"><br/>
-        <input type="hidden" id="identifier" v-model="optionData.id"/>
+        <input type="hidden" id="index" v-bind="index"/>
         <input type="submit" value="Update Option"/>
     </form>
     <form @submit.prevent="deleteOption" action="/" method="post">
-        <input type="hidden" id="identifier" v-model="optionData.id"/>
+        <input type="hidden" id="index" v-bind="index"/>
         <input type="submit" value="Delete Option"/>
     </form>
 </template>

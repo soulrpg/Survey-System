@@ -29,6 +29,9 @@ async function postData(url, data = {}, method = 'POST') {
 
 export default {
     props: ['surveyData'],
+    components: {
+        Question,
+    },
     data() {
         return {
             questionsVisible: false,
@@ -66,19 +69,20 @@ export default {
             postData('http://localhost:8000/api/question/create', this.newQuestion)
             .then((data) => {
                 if (data.msg !== undefined && data.msg === 'Success') {
-                    updateQuestionList()
+                    this.updateQuestionList()
                 } else {
                     this.error = data.message ?? '';
                 }
             });
         },
         changeQuestionsVisibility() {
-            this.questionsVisible = !this.questionVisible;
+            this.questionsVisible = !this.questionsVisible;
             if (this.questionsVisible) {
-                upadateQuestionList()
+                this.updateQuestionList()
             }
         },
         updateQuestionList() {
+            console.log('updateQuestionList');
             getData(`http://localhost:8000/api/survey/list-questions/${this.surveyData.id}`)
             .then((data) => {
                 this.questions = data
@@ -91,6 +95,7 @@ export default {
 
 <template>
     <h2>{{ surveyData.title }}</h2>
+    <h3>Id: {{ surveyData.id }}</h3>
     <p v-if="error">{{error}}</p>
     <form @submit.prevent="updateSurvey" action="/" method="post">
         <label for="title">Title:</label><br/>
@@ -111,10 +116,10 @@ export default {
         <Question
             v-for="question in questions"
             :key="question.id"
-            :questionData="{id: question.id, title: question.title, description: question.description}"
+            :index="question.id"
+            :questionData="{survey: surveyData.id, title: question.title, description: question.description}"
         />
         <h3>Add new question</h3>
-        <p v-if="error">{{error}}</p>
         <form @submit.prevent="addNewQuestion" action="/" method="post">
             <label for="title">Title:</label><br/>
             <input type="text" id="title" v-model="newQuestion.title"><br/>
