@@ -54,10 +54,10 @@ survey_send_answers:
   requirements:
     id: '\d+'
 
-survey_list_answer_groups:
-  path: /api/survey/list-answers/{id}
+survey_answer_count:
+  path: /api/survey/answer-count/{id}
   methods: [GET]
-  controller: App\Controller\SurveyController::listAnswerGroups
+  controller: App\Controller\SurveyController::showAnswerCount
   requirements:
     id: '\d+'
 

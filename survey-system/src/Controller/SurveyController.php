@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Answer;
 use App\Entity\AnswerGroup;
+use App\Entity\Option;
+use App\Entity\Question;
 use App\Entity\Survey;
 use App\Repository\OptionRepository;
 use App\Repository\SurveyRepository;
@@ -145,28 +147,41 @@ class SurveyController extends AbstractController
     }
 
     /**
-     * List answerGroups belonging to a specific survey
+     * Show count of answers given to all questions & options of one survey
+     *
+     * {
+     *    "question_1": ["option_1": 9, "option_2": 20],
+     *    "question_1": ["option_1": 9, "option_2": 2, "option_3": 5],
+     * }
      * 
      * @param Survey $survey
-     * @param SerializerService $serializerService
      * @return JsonResponse
      */
-    public function listAnswerGroups(Survey $survey, SerializerService $serializerService): JsonResponse
+    public function showAnswerCount(Survey $survey): JsonResponse
     {
-        return new JsonResponse(
-            $serializerService->getSerializer()->normalize(
-                $survey->getAnswerGroups(),
-                'json',
-                [AbstractNormalizer::ATTRIBUTES => ['id', ['pickedOption' => 'id']]]
-            ), 
-            Response::HTTP_OK
-        );
+        if ($this->getUser()->getId() === $survey->getUser()->getId()) {
+            $answerCount = [];
+            $surveyQuestions = $survey->getQuestions();
+            /** @var Question $question */
+            foreach ($surveyQuestions as $question) {
+                $options = $question->getOptions();
+                $answerCount[$question->getTitle()] = [];
+                /** @var Option $option */
+                foreach ($options as $option) {
+                    $answerCount[$question->getTitle()][$option->getName()] = $option->getAnswers()->count();
+                }
+            }
+            return new JsonResponse(
+                json_encode($answerCount),
+                Response::HTTP_OK
+            );
+        } else {
+            return new JsonResponse(['error' => 'Survey does not belong to current user'], Response::HTTP_FORBIDDEN);
+        }
     }
 
     /**
      * Submit answers (AnswerGroup) to given survey
-     * TODO: Check if that works, if not create answer group & answers manually without
-     * processing the form
      *
      * @param Survey $survey
      * @param Request $request
