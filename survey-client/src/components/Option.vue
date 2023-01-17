@@ -1,30 +1,5 @@
 <script>
-import {setCookie, getCookie} from "../utility/CookieManager"
-
-async function getData(url) {
-    const response = await fetch(url, {
-        method: 'GET',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        }
-    });
-    return await response.json();
-}
-
-async function postData(url, data = {}, method = 'POST') {
-    const response = await fetch(url, {
-        method: method,
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        },
-        body: JSON.stringify(data, null, "\t")
-    });
-    return await response.json();
-}
+import {postData} from "../utility/Utility"
 
 export default {
     props: ['optionData', 'index'],

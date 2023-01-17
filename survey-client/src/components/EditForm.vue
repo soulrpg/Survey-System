@@ -1,33 +1,6 @@
 <script>
 import Survey from './Survey.vue';
-import {setCookie, getCookie} from "../utility/CookieManager"
-
-async function getData(url) {
-    const response = await fetch(url, {
-        method: 'GET',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        }
-    });
-    return await response.json();
-}
-
-async function postData(url, data = {}) {
-    console.log(data);
-    const response = await fetch(url, {
-        method: 'POST',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        },
-        body: JSON.stringify(data, null, "\t")
-    });
-    return await response.json();
-}
-
+import {postData, getData} from "../utility/Utility"
 
 export default {
     components: {

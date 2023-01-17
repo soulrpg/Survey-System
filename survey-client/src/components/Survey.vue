@@ -1,31 +1,6 @@
 <script>
 import Question from './Question.vue';
-import {setCookie, getCookie} from "../utility/CookieManager"
-
-async function getData(url) {
-    const response = await fetch(url, {
-        method: 'GET',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        }
-    });
-    return await response.json();
-}
-
-async function postData(url, data = {}, method = 'POST') {
-    const response = await fetch(url, {
-        method: method,
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        },
-        body: JSON.stringify(data, null, "\t")
-    });
-    return await response.json();
-}
+import {postData, getData} from "../utility/Utility"
 
 export default {
     props: ['surveyData'],
@@ -35,12 +10,14 @@ export default {
     data() {
         return {
             questionsVisible: false,
+            answersVisible: false,
             questions: [],
             newQuestion: {
                 title: '',
                 survey: this.surveyData.id,
                 descrption: '',
             },
+            answers: {},
             error: '',
         }
     },
@@ -78,15 +55,27 @@ export default {
         changeQuestionsVisibility() {
             this.questionsVisible = !this.questionsVisible;
             if (this.questionsVisible) {
+                this.answersVisible = false;
                 this.updateQuestionList()
             }
         },
         updateQuestionList() {
-            console.log('updateQuestionList');
             getData(`http://localhost:8000/api/survey/list-questions/${this.surveyData.id}`)
             .then((data) => {
                 this.questions = data
-                console.log(this.surveys)
+            });
+        },
+        changeAnswersVisibility() {
+            this.answersVisible = !this.answersVisible;
+            if (this.answersVisible) {
+                this.questionsVisible = false;
+                this.updateAnswerList()
+            }  
+        },
+        updateAnswerList() {
+            getData(`http://localhost:8000/api/survey/answer-count/${this.surveyData.id}`)
+            .then((data) => {
+                this.answers = data
             });
         }
     }
@@ -112,6 +101,7 @@ export default {
         <input type="submit" value="Delete Survey"/>
     </form>
     <button @click="changeQuestionsVisibility">Show questions</button>
+    <button @click="changeAnswersVisibility">Show answers</button>
     <div v-show="questionsVisible">
         <Question
             v-for="question in questions"
@@ -128,6 +118,16 @@ export default {
             <input type="hidden" id="identifier" v-model="newQuestion.survey"/>
             <input type="submit" value="Create New Question"/>
         </form>
+    </div>
+    <div v-show="answersVisible">
+        <div v-for="(answer, name) in answers">
+            <h5>{{ name }}</h5>
+            <ol>
+                <li v-for="(count, option) in answer">
+                    {{ option }}: {{ count }}
+                </li>
+            </ol>
+        </div>
     </div>
 </template>
 

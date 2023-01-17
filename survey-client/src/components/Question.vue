@@ -1,31 +1,6 @@
 <script>
 import Option from './Option.vue';
-import {setCookie, getCookie} from "../utility/CookieManager"
-
-async function getData(url) {
-    const response = await fetch(url, {
-        method: 'GET',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        }
-    });
-    return await response.json();
-}
-
-async function postData(url, data = {}, method = 'POST') {
-    const response = await fetch(url, {
-        method: method,
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        },
-        body: JSON.stringify(data, null, "\t")
-    });
-    return await response.json();
-}
+import {postData, getData} from "../utility/Utility"
 
 export default {
     props: ['questionData', 'index'],
@@ -84,7 +59,6 @@ export default {
             getData(`http://localhost:8000/api/question/list-options/${this.index}`)
             .then((data) => {
                 this.options = data
-                console.log(this.options)
             });
         }
     }

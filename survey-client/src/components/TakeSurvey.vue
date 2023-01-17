@@ -1,30 +1,6 @@
 <script>
-import {setCookie, getCookie} from "../utility/CookieManager"
+import {postData, getData} from "../utility/Utility"
 import AnswerQuestion from './AnswerQuestion.vue';
-
-async function postData(url, data = {}) {
-    const response = await fetch(url, {
-        method: 'POST',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data, null, "\t")
-    });
-    return await response.json();
-}
-
-async function getData(url) {
-    const response = await fetch(url, {
-        method: 'GET',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getCookie('surveyUserToken')
-        }
-    });
-    return await response.json();
-}
 
 export default {
     components: {
