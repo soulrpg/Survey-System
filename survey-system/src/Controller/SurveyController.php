@@ -172,7 +172,7 @@ class SurveyController extends AbstractController
                 }
             }
             return new JsonResponse(
-                json_encode($answerCount),
+                $answerCount,
                 Response::HTTP_OK
             );
         } else {
