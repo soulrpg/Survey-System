@@ -34,12 +34,12 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/survey/show, roles: PUBLIC_ACCESS }
+        - { path: ^/api/survey, roles: PUBLIC_ACCESS }
         - { path: ^/api/survey/send-answers, roles: PUBLIC_ACCESS }
-        - { path: ^ /api/survey/list-questions, roles: PUBLIC_ACCESS }
-        - { path: ^ /api/question/list-options, roles: PUBLIC_ACCESS }
-        - { path: ^ /api/question/show, roles: PUBLIC_ACCESS }
-        - { path: ^ /api/option/show, roles: PUBLIC_ACCESS }
+        - { path: ^/api/survey/list-questions, roles: PUBLIC_ACCESS }
+        - { path: ^/api/question/list-options, roles: PUBLIC_ACCESS }
+        - { path: ^/api/question/show, roles: PUBLIC_ACCESS }
+        - { path: ^/api/option/show, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

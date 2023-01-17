@@ -89,7 +89,7 @@ question_delete:
 
 question_list_options:
   path: /api/question/list-options/{id}
-  methods: [DELETE]
+  methods: [GET]
   controller: App\Controller\QuestionController::listOptions
   requirements:
     id: '\d+'
